@@ -4,7 +4,7 @@ import os
 from telethon import TelegramClient
 from config import BOT_TOKEN, CHAT_ID, API_ID, API_HASH, CHANNEL
 
-KEYWORDS = ["nuova versione", "aggiornamento"]
+KEYWORDS = ["nuo va versione", "aggiornamento"]
 APPS = ["3bmeteo", "prezzi benzina"]
 
 FILE = "last_id.txt"
