@@ -95,10 +95,10 @@ async def main():
 )
 
             # ✅ inoltra direttamente il messaggio originale
-                await client.forward_messages(
+                await client.send_file(
                     "me",
-                     msg
-)
+                    msg)
+
 
 
                 stored_versions[name] = version
