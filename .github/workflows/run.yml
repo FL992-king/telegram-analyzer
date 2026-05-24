@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -18,8 +18,14 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install requirements
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Run script
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          API_ID: ${{ secrets.API_ID }}
+          API_HASH: ${{ secrets.API_HASH }}
         run: python main.py
+        
