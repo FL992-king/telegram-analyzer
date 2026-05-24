@@ -4,19 +4,18 @@ import os
 BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_ID = os.environ["CHAT_ID"]
 
-# ===== TELEGRAM API (Telethon) =====
+# ===== TELEGRAM API =====
 API_ID = int(os.environ["API_ID"])
 API_HASH = os.environ["API_HASH"]
 
-# ===== CANALI DA MONITORARE =====
+# ===== CANALI (ID FINALMENTE STABILI ✅)
 CHANNELS = [
-    "https://t.me/+fHhFxAb1fEE3NmIx",   # CANALE PRIVATO
+    -1001731133661,
+    -1001818148294,
 ]
 
-# ===== APP DA MONITORARE =====
-# "chiave": "nome visualizzato"
+# ===== APP DA MONITORARE
 APPS = {
     "3bmeteo": "3B Meteo",
     "prezzi benzina": "Prezzi Benzina",
 }
-

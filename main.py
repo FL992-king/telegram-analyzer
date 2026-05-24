@@ -2,10 +2,11 @@ import requests
 import asyncio
 import os
 import re
+import json
 from telethon import TelegramClient
 from config import BOT_TOKEN, CHAT_ID, API_ID, API_HASH, CHANNELS, APPS
 
-FILE = "last_id.txt"
+FILE_VERSIONS = "versions.json"
 
 def send_alert(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -14,23 +15,23 @@ def send_alert(text):
         "text": text
     })
 
-def load_last_id():
-    if not os.path.exists(FILE):
-        return 0
-    with open(FILE, "r") as f:
-        return int(f.read())
+def load_versions():
+    if not os.path.exists(FILE_VERSIONS):
+        return {}
+    with open(FILE_VERSIONS, "r") as f:
+        return json.load(f)
 
-def save_last_id(msg_id):
-    with open(FILE, "w") as f:
-        f.write(str(msg_id))
+def save_versions(data):
+    with open(FILE_VERSIONS, "w") as f:
+        json.dump(data, f)
 
 def extract_version(text):
     match = re.search(r'\d+\.\d+(\.\d+)?', text)
-    return match.group(0) if match else "Non trovata"
+    return match.group(0) if match else None
 
 def extract_link(text):
     match = re.search(r'(https?://\S+)', text)
-    return match.group(0) if match else "Link non disponibile"
+    return match.group(0) if match else None
 
 def analyze_message(text):
     text_lower = text.lower()
@@ -40,36 +41,41 @@ def analyze_message(text):
             version = extract_version(text)
             link = extract_link(text)
 
-            return f"📱 {name}\n\n✅ Ultima versione: {version}\n🔗 Scarica qui: {link}"
+            if version and link:
+                return name, version, link
 
-    return None
+    return None, None, None
 
 async def main():
     async with TelegramClient("session", API_ID, API_HASH) as client:
-        print("✅ Controllo multi-canale...")
+        print("✅ Controllo avanzato app...")
 
-        last_id = load_last_id()
-        nuovi = []
+        stored_versions = load_versions()
 
         for channel in CHANNELS:
-            entity = await client.get_entity(channel)
-            messages = await client.get_messages(entity, limit=50)
+            messages = await client.get_messages(channel, limit=50)
 
             for msg in messages:
-                if msg.id > last_id and msg.text:
-                    result = analyze_message(msg.text)
-            if result:
-                nuovi.append((msg.id, result))
+                if not msg.text:
+                    continue
 
-        if nuovi:
-            nuovi.sort(key=lambda x: x[0])
+                name, version, link = analyze_message(msg.text)
 
-            testi = [item[1] for item in nuovi]
-            send_alert("\n\n".join(testi))
+                if name:
+                    last_version = stored_versions.get(name)
 
-            save_last_id(nuovi[-1][0])
-        else:
-            print("❗ Nessun aggiornamento trovato")
+                    if last_version != version:
+                        print(f"🔔 Nuova versione trovata: {name} {version}")
+
+                        send_alert(
+                            f"📱 {name}\n\n"
+                            f"✅ Ultima versione: {version}\n"
+                            f"🔗 Scarica qui: {link}"
+                        )
+
+                        stored_versions[name] = version
+
+        save_versions(stored_versions)
 
 if __name__ == "__main__":
     asyncio.run(main())
