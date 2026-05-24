@@ -56,10 +56,11 @@ async def main():
     async with TelegramClient("session", API_ID, API_HASH) as client:
         print("✅ Controllo APK diretto...")
 
+        entity = await client.get_entity(CHAT_ID)
+
         stored_versions = load_versions()
         best_messages = {}
 
-        # 🔄 legge i canali
         for channel in CHANNELS:
             messages = await client.get_messages(channel, limit=50)
 
@@ -77,29 +78,22 @@ async def main():
                         if version_to_tuple(version) > version_to_tuple(current_version):
                             best_messages[name] = (version, msg)
 
-        # 🚀 INVIO SOLO VERSIONI NUOVE
         for name, (version, msg) in best_messages.items():
             last = stored_versions.get(name)
 
             if last != version:
-                print(f"🔔 Nuova versione: {name} {version}")
-
-                # ✅ manda testo
                 send_message(
                     f"📱 {name}\n\n"
                     f"✅ Ultima versione: {version}\n"
                     f"📎 APK incluso:"
                 )
 
-                # ✅ manda FILE direttamente
-                await client.send_file(
-                    CHAT_ID,
-                    msg.media
-                )
+                await client.send_file(entity, msg.media)
 
                 stored_versions[name] = version
 
         save_versions(stored_versions)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
