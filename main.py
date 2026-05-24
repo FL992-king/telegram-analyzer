@@ -56,7 +56,7 @@ async def main():
     async with TelegramClient("session", API_ID, API_HASH) as client:
         print("✅ Controllo APK diretto...")
 
-        entity = await client.get_entity(CHAT_ID)
+        entity = "me"
 
         stored_versions = load_versions()
         best_messages = {}
