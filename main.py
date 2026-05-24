@@ -92,12 +92,14 @@ async def main():
                     f"📱 {name}\n\n"
                     f"✅ Ultima versione: {version}\n"
                     f"📎 APK incluso"
-                )
+)
 
-                await client.send_file(
-                    entity,
-                    msg.media
-                )
+            # ✅ inoltra direttamente il messaggio originale
+                await client.forward_messages(
+                    "me",
+                     msg
+)
+
 
                 stored_versions[name] = version
 
