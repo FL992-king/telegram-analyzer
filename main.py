@@ -56,8 +56,8 @@ async def main():
             messages = await client.get_messages(entity, limit=50)
 
             for msg in messages:
-            if msg.id > last_id and msg.text:
-                result = analyze_message(msg.text)
+                if msg.id > last_id and msg.text:
+                    result = analyze_message(msg.text)
             if result:
                 nuovi.append((msg.id, result))
 
