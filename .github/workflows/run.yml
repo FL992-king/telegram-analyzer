@@ -22,4 +22,3 @@ jobs:
 
       - name: Esegui script
         run: python main.py
-``
