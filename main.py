@@ -8,7 +8,7 @@ from config import BOT_TOKEN, CHAT_ID, API_ID, API_HASH, CHANNELS, APPS
 
 FILE_VERSIONS = "versions.json"
 
-# ===== INVIO TESTO =====
+# ===== INVIO MESSAGGIO =====
 def send_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     requests.post(url, json={
@@ -16,7 +16,7 @@ def send_message(text):
         "text": text
     })
 
-# ===== STORAGE =====
+# ===== STORAGE VERSIONI =====
 def load_versions():
     if not os.path.exists(FILE_VERSIONS):
         return {}
@@ -27,14 +27,19 @@ def save_versions(data):
     with open(FILE_VERSIONS, "w") as f:
         json.dump(data, f)
 
-# ===== ESTRAI VERSIONE DA FILE =====
+# ===== VERSIONE DA NOME FILE =====
 def extract_version(filename):
     match = re.search(r'v?(\d+\.\d+(\.\d+)?)', filename.lower())
     return match.group(1) if match else None
 
-# ===== VERSION COMPARE =====
+# ===== CONFRONTO VERSIONI =====
 def version_to_tuple(v):
     return tuple(map(int, v.split(".")))
+
+# ===== LINK TELEGRAM DIRETTO =====
+def build_telegram_link(msg):
+    chat_id = str(msg.chat_id).replace("-100", "")
+    return f"https://t.me/c/{chat_id}/{msg.id}"
 
 # ===== ANALISI FILE APK =====
 def analyze_file(msg):
@@ -58,12 +63,10 @@ def analyze_file(msg):
 # ===== MAIN =====
 async def main():
     async with TelegramClient("session", API_ID, API_HASH) as client:
-        print("✅ Controllo APK diretto (file)")
+        print("✅ Monitor APK (versione veloce con link)")
 
         stored_versions = load_versions()
         best_files = {}
-
-        entity = "me"
 
         for channel in CHANNELS:
             messages = await client.get_messages(channel, limit=50)
@@ -82,24 +85,20 @@ async def main():
                         if version_to_tuple(version) > version_to_tuple(current_version):
                             best_files[name] = (version, real_msg)
 
+        # ✅ INVIO SOLO NUOVE VERSIONI
         for name, (version, msg) in best_files.items():
             last = stored_versions.get(name)
 
             if last != version:
+                link = build_telegram_link(msg)
+
                 print(f"🔔 Nuova versione: {name} {version}")
 
                 send_message(
                     f"📱 {name}\n\n"
                     f"✅ Ultima versione: {version}\n"
-                    f"📎 APK incluso"
-)
-
-            # ✅ inoltra direttamente il messaggio originale
-                await client.send_file(
-                    "me",
-                    msg)
-
-
+                    f"📥 Scarica APK:\n{link}"
+                )
 
                 stored_versions[name] = version
 
