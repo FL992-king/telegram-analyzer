@@ -1,5 +1,8 @@
-BOT_TOKEN = "8992089543:AAGsFNeKDZj7L7ttOppevLkaa8iV9tPKaag"
-CHAT_ID = "149351206"
-API_ID = 39831826
-API_HASH = "3f10640c4a3d0b6d8479450ced1e957f"
-CHANNEL = "@ApplicazioniCR"
+import os
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+API_ID = int(os.getenv("API_ID"))
+API_HASH = os.getenv("API_HASH")
+CHANNEL = "ApplicazioniCR"
