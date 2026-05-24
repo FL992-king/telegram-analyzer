@@ -1,1 +1,25 @@
+name: Telegram Analyzer
 
+on:
+  schedule:
+    - cron: "0 8 * * *"  # ogni giorno alle 08:00
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clona repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Esegui script
+        run: python main.py
+``
