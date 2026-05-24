@@ -16,7 +16,7 @@ def send_message(text):
         "text": text
     })
 
-# ===== STORAGE VERSIONI =====
+# ===== STORAGE =====
 def load_versions():
     if not os.path.exists(FILE_VERSIONS):
         return {}
@@ -27,73 +27,81 @@ def save_versions(data):
     with open(FILE_VERSIONS, "w") as f:
         json.dump(data, f)
 
-# ===== VERSIONE =====
-def extract_version(text):
-    match = re.search(r'\d+\.\d+(\.\d+)?', text)
-    return match.group(0) if match else None
+# ===== ESTRAI VERSIONE DA FILE =====
+def extract_version(filename):
+    match = re.search(r'v?(\d+\.\d+(\.\d+)?)', filename.lower())
+    return match.group(1) if match else None
 
+# ===== VERSION COMPARE =====
 def version_to_tuple(v):
     return tuple(map(int, v.split(".")))
 
-# ===== ANALISI =====
-def analyze_message(msg):
-    if not msg.text or not msg.file:
+# ===== ANALISI FILE APK =====
+def analyze_file(msg):
+    if not msg.file:
         return None
 
-    text_lower = msg.text.lower()
+    filename = msg.file.name.lower()
+
+    if not filename.endswith(".apk"):
+        return None
 
     for key, name in APPS.items():
-        if key in text_lower:
-            version = extract_version(msg.text)
+        if key in filename:
+            version = extract_version(filename)
 
             if version:
-                return name, version
+                return name, version, msg
 
     return None
 
 # ===== MAIN =====
 async def main():
     async with TelegramClient("session", API_ID, API_HASH) as client:
-        print("✅ Controllo APK diretto...")
-
-        entity = "me"
+        print("✅ Controllo APK diretto (file)")
 
         stored_versions = load_versions()
-        best_messages = {}
+        best_files = {}
+
+        entity = "me"
 
         for channel in CHANNELS:
             messages = await client.get_messages(channel, limit=50)
 
             for msg in messages:
-                result = analyze_message(msg)
+                result = analyze_file(msg)
 
                 if result:
-                    name, version = result
+                    name, version, real_msg = result
 
-                    if name not in best_messages:
-                        best_messages[name] = (version, msg)
+                    if name not in best_files:
+                        best_files[name] = (version, real_msg)
                     else:
-                        current_version = best_messages[name][0]
+                        current_version = best_files[name][0]
 
                         if version_to_tuple(version) > version_to_tuple(current_version):
-                            best_messages[name] = (version, msg)
+                            best_files[name] = (version, real_msg)
 
-        for name, (version, msg) in best_messages.items():
+        for name, (version, msg) in best_files.items():
             last = stored_versions.get(name)
 
             if last != version:
+                print(f"🔔 Nuova versione: {name} {version}")
+
                 send_message(
                     f"📱 {name}\n\n"
                     f"✅ Ultima versione: {version}\n"
-                    f"📎 APK incluso:"
+                    f"📎 APK incluso"
                 )
 
-                await client.send_file(entity, msg.media)
+                await client.send_file(
+                    entity,
+                    msg.media
+                )
 
                 stored_versions[name] = version
 
         save_versions(stored_versions)
-
 
 if __name__ == "__main__":
     asyncio.run(main())
