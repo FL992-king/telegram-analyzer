@@ -2,7 +2,7 @@ name: Telegram Analyzer
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    - cron: "0 8 * * *"  # ogni giorno alle 08:00
 
 jobs:
   run:
@@ -22,3 +22,4 @@ jobs:
 
       - name: Esegui script
         run: python main.py
+``
