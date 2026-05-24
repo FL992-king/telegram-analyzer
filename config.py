@@ -1,8 +1,15 @@
 import os
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+def get_env(name):
+    value = os.getenv(name)
+    if value is None:
+        raise ValueError(f"Variabile {name} non trovata nei secrets GitHub")
+    return value
 
-API_ID = int(os.getenv("API_ID"))
-API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = get_env("BOT_TOKEN")
+CHAT_ID = get_env("CHAT_ID")
+
+API_ID = int(get_env("API_ID"))
+API_HASH = get_env("API_HASH")
+
 CHANNEL = "ApplicazioniCR"
