@@ -2,7 +2,7 @@ name: Telegram Analyzer
 
 on:
   schedule:
-    - cron: "0 9 * * *"  # ogni giorno alle 08:00
+    - cron: "0 9 * * *"
 
 jobs:
   run:
