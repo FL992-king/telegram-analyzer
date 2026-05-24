@@ -14,5 +14,10 @@ CHANNELS = [
 # ✅ app da monitorare (match su nome file)
 APPS = {
     "3bmeteo": "3B Meteo",
-    "prezzi benzina": "Prezzi Benzina",
+    "prezzi": "Prezzi Benzina",
+
+    "spotify": "Spotify Mod",
+    "spotif": "Spotify Mod",
+
+    "flightradar": "Flightradar24 Mod",
 }
